@@ -96,10 +96,18 @@ async function descargarCuentaCorriente() {
 }
 
 async function irANoRenovar() {
-    console.log("[Cohen Auto] Entrando a No Renovar...");
-    await clickXPath('//*[@id="menu_izquierda"]/li[4]/ul/li[2]/a', "Menú No Renovar");
-    await esperarXPath('//*[@id="DataTables_Table_0"]/thead/tr[2]/td[5]/div[1]/input');
-    await sleep(CFG.delayPage);
+  const xpath = '//*[@id="menu_izquierda"]/li[4]/ul/li[2]/a';
+  console.log('[Cohen Auto] Navegando a No Renovar...');
+  await clickByXPath(xpath, 'Menú No Renovar');
+
+  // Esperamos a que esté la tabla principal que usamos (la misma del paginador Next)
+  try {
+    await esperarXPath('//*[@id="DataTables_Table_8"]', 15000);
+  } catch (e) {
+    console.warn('[Cohen Auto] No se encontró la tabla DataTables_Table_8:', e);
+  }
+
+  await sleep(MODO_ACTUAL.delayPagina);
 }
 
 function getTodayParts() {
