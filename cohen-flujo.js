@@ -116,37 +116,39 @@ function buscarDiaCalendario(dayNum) {
 }
 
 async function aplicarFiltroFechaHoy() {
-    console.log("[Cohen Auto] Aplicando filtro fecha...");
-    const input = await esperarXPath('//*[@id="DataTables_Table_0"]/thead/tr[2]/td[5]/div[1]/input');
-    const { yyyy, mm, dd, dayNum } = getTodayParts();
-    const hoy = `${yyyy}-${mm}-${dd}`;
+  console.log("[Cohen Auto] Aplicando filtro de fecha = hoy (DataTables)...");
 
-    input.focus();
-    input.click();
-    await sleep(CFG.delayClick);
+  const { yyyy, mm, dd } = getTodayParts();
+  const hoy = `${yyyy}-${mm}-${dd}`;
 
-    // Intento jQuery datepicker
-    try {
-        if (window.$ && $.fn.datepicker) {
-            $(input).datepicker("setDate", new Date());
-            $(input).trigger("change");
-            await sleep(CFG.delayFilter);
-            return;
-        }
-    } catch {}
-
-    // Intento clic en el calendario
-    const dia = buscarDiaCalendario(dayNum);
-    if (dia) {
-        dia.click();
+  try {
+    if (window.$ && $.fn.dataTable) {
+      // Usamos la tabla que matchea con el botón Next: DataTables_Table_8
+      const dt = $('#DataTables_Table_8').DataTable();
+      dt.search(hoy).draw();   // búsqueda global por la fecha
+      console.log("[Cohen Auto] Filtro aplicado via DataTables.search:", hoy);
+      await sleep(CFG.delayFilter);
+      return;
     } else {
-        input.value = hoy;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new Event("change", { bubbles: true }));
+      console.warn("[Cohen Auto] DataTables no disponible, no pude aplicar el filtro vía API");
     }
+  } catch (e) {
+    console.warn("[Cohen Auto] Error aplicando filtro via DataTables:", e);
+  }
 
+  // Fallback muy simple por si no hay DataTables (casi seguro no lo vas a usar)
+  console.warn("[Cohen Auto] Usando fallback simple de input (puede no funcionar bien)");
+  try {
+    const input = await esperarXPath('//*[@id="DataTables_Table_8"]/thead/tr[2]/td[5]/div[1]/input');
+    input.value = hoy;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
     await sleep(CFG.delayFilter);
+  } catch (e2) {
+    console.warn("[Cohen Auto] Fallback también falló:", e2);
+  }
 }
+
 
 function btnNext() {
     return document.evaluate(
