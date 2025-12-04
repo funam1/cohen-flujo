@@ -107,7 +107,7 @@ async function irANoRenovar() {
     console.warn('[Cohen Auto] No se encontró la tabla DataTables_Table_8:', e);
   }
 
-  await sleep(MODO_ACTUAL.delayPagina);
+  await sleep(CFG.delayPagina);
 }
 
 function getTodayParts() {
@@ -166,15 +166,22 @@ function btnNext() {
 }
 
 async function clickNoRenovar() {
-    const botones = Array.from(document.querySelectorAll("button, a"))
-        .filter(b => b.textContent.trim().toLowerCase() === "no renovar");
+    const botones = Array.from(document.querySelectorAll('button, a'))
+    .filter(el => {
+      const txt = el.textContent.trim().toLowerCase();
+      return txt.includes('no renovar');  // más flexible que igualdad estricta
+    });
 
-    console.log("[Cohen Auto] Botones No Renovar:", botones.length);
+  console.log('[Cohen Auto] Botones "No Renovar" en esta página:', botones.length);
 
-    for (const b of botones) {
-        b.click();
-        await sleep(CFG.delayClick);
+  for (const b of botones) {
+    try {
+      b.click();
+      await sleep(CFG.delayClick);
+    } catch (e) {
+      console.warn('[Cohen Auto] Error al clickear "No Renovar":', e);
     }
+  }
 }
 
 async function procesarNoRenovar() {
