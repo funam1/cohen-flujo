@@ -96,6 +96,7 @@ async function descargarCuentaCorriente() {
 }
 
 async function irANoRenovar() {
+   
   const xpath = '//*[@id="menu_izquierda"]/li[4]/ul/li[2]/a';
   console.log('[Cohen Auto] Navegando a No Renovar...');
   await clickByXPath(xpath, 'Menú No Renovar');
